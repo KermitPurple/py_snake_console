@@ -66,6 +66,9 @@ class Coord:
         else:
             raise TypeError(f'Cannot divide {type(other)} and Coord')
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
     def clone(self):
         return Coord(*self)
 
@@ -131,6 +134,7 @@ class SnakeGame:
         self.snake = ListNode(self.board_size // 2)
         self.length_to_add = 2
         self.direction = Direction.UP
+        self.running = True
 
     def board_to_screen(self, pos):
         pos = Coord(*pos)
@@ -155,6 +159,13 @@ class SnakeGame:
         self.move_cursor(self.board_to_screen(pos))
         print('  ')
 
+    def collide(self, pos: Coord) -> bool:
+        return (pos.x < 0 or
+                pos.y < 0 or
+                pos.x >= self.board_size.x or
+                pos.y >= self.board_size.y or
+                pos in self.snake)
+
     def update(self):
         pos = self.snake.val.clone()
         if self.direction == Direction.UP:
@@ -165,11 +176,17 @@ class SnakeGame:
             pos.x -= 1
         elif self.direction == Direction.RIGHT:
             pos.x += 1
+        if self.collide(pos):
+            self.running = False
+            return
+        self.erase_piece(self.snake.tail().val)
         self.snake = self.snake.push_front(pos)
         if self.length_to_add == 0:
             self.snake.pop()
         else:
             self.length_to_add -= 1
+        self.draw_head_piece(self.snake.val)
+        self.draw_tail_piece(self.snake.next.val)
 
     def keyboard_input(self):
         if not kbhit():
@@ -184,11 +201,8 @@ class SnakeGame:
 
     def run(self):
         self.setup_window()
-        while 1:
-            self.erase_piece(self.snake.tail().val)
+        while self.running:
             self.update()
-            self.draw_head_piece(self.snake.val)
-            self.draw_tail_piece(self.snake.next.val)
             self.keyboard_input()
             time.sleep(0.1)
 
