@@ -70,7 +70,12 @@ class ListNode:
             n = n.next
         return n
 
-    def push(self, *vals: any):
+    def push_front(self, *vals: [any]) -> 'ListNode':
+        for val in vals:
+            self = ListNode(val, self)
+        return self
+
+    def push(self, *vals: [any]):
         for val in vals:
             self.tail().next = ListNode(val)
 
@@ -125,14 +130,21 @@ class SnakeGame:
         print(Back.WHITE + ' ' * self.window_size.x + Style.RESET_ALL, end = '')
 
     def update(self):
+        pos = self.snake.val
         if self.direction == Direction.UP:
-            self.snake.val.y -= 1
+            pos.y -= 1
         elif self.direction == Direction.DOWN:
-            self.snake.val.y += 1
+            pos.y += 1
         elif self.direction == Direction.LEFT:
-            self.snake.val.x -= 1
+            pos.x -= 1
         elif self.direction == Direction.RIGHT:
-            self.snake.val.x += 1
+            pos.x += 1
+        self.snake = self.snake.push_front(pos)
+        if self.length_to_add == 0:
+            self.snake.pop()
+        else:
+            self.length_to_add -= 1
+
 
     def run(self):
         self.setup_window()
