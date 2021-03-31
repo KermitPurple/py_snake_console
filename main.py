@@ -1,4 +1,4 @@
-import cursor, random
+import cursor, random, time
 from enum import Enum
 from os import system
 from colorama import init, Fore, Back, Style, Cursor
@@ -57,6 +57,9 @@ class Coord:
             return Coord(self.x // other.x, self.y // other.y)
         else:
             raise TypeError(f'Cannot divide {type(other)} and Coord')
+
+    def clone(self):
+        return Coord(*self)
 
 @dataclass
 class ListNode:
@@ -132,16 +135,20 @@ class SnakeGame:
             print(Back.WHITE + '  '  + Back.BLACK + ' ' * (self.window_size.x - 4) + Back.WHITE + '  ', end = '')
         print(Back.WHITE + ' ' * self.window_size.x + Style.RESET_ALL, end = '')
 
-    def draw_tail_piece(self, pos):
+    def draw_tail_piece(self, pos: Coord):
         self.move_cursor(self.board_to_screen(pos))
-        print(Back.BLUE + Fore.LIGHTBLUE_EX + '▒▒')
+        print(Back.BLUE + Fore.LIGHTBLUE_EX + '▒▒' + Style.RESET_ALL)
 
-    def draw_head_piece(self, pos):
+    def draw_head_piece(self, pos: Coord):
         self.move_cursor(self.board_to_screen(pos))
-        print(Back.BLUE + Fore.LIGHTBLUE_EX + 'XX')
+        print(Back.BLUE + Fore.LIGHTBLUE_EX + 'XX' + Style.RESET_ALL)
+
+    def erase_piece(self, pos: Coord):
+        self.move_cursor(self.board_to_screen(pos))
+        print('  ')
 
     def update(self):
-        pos = self.snake.val
+        pos = self.snake.val.clone()
         if self.direction == Direction.UP:
             pos.y -= 1
         elif self.direction == Direction.DOWN:
@@ -159,10 +166,11 @@ class SnakeGame:
     def run(self):
         self.setup_window()
         while 1:
+            self.erase_piece(self.snake.tail().val)
             self.update()
-            self.draw_head_piece((0, 0))
-            self.draw_head_piece(self.board_size - 1)
-
+            self.draw_head_piece(self.snake.val)
+            self.draw_tail_piece(self.snake.next.val)
+            time.sleep(0.2)
 
 if __name__ == '__main__': # driver code
     init()
