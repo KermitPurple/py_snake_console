@@ -115,6 +115,7 @@ class SnakeGame:
         self.window_size = self.board_to_screen(self.board_size) + Coord(2, 1)
         self.snake = ListNode(self.board_size // 2)
         self.length_to_add = 2
+        self.direction = Direction.UP
 
     def setup_window(self):
         system(f'mode con: cols={self.window_size.x} lines={self.window_size.y}')
@@ -123,10 +124,20 @@ class SnakeGame:
             print(Back.WHITE + '  '  + Back.BLACK + ' ' * (self.window_size.x - 4) + Back.WHITE + '  ', end = '')
         print(Back.WHITE + ' ' * self.window_size.x + Style.RESET_ALL, end = '')
 
+    def update(self):
+        if self.direction == Direction.UP:
+            self.snake.val.y -= 1
+        elif self.direction == Direction.DOWN:
+            self.snake.val.y += 1
+        elif self.direction == Direction.LEFT:
+            self.snake.val.x -= 1
+        elif self.direction == Direction.RIGHT:
+            self.snake.val.x += 1
+
     def run(self):
         self.setup_window()
         while 1:
-            pass
+            self.update()
 
 
 if __name__ == '__main__': # driver code
