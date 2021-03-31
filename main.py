@@ -69,8 +69,25 @@ class Coord:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
+    def __hash__(self):
+        return hash((self.x, self.y))
+
     def clone(self):
         return Coord(*self)
+
+COORD_DIRECTION = {
+        Coord(0, -1): Direction.UP,
+        Coord(0, 1): Direction.DOWN,
+        Coord(-1, 0): Direction.LEFT,
+        Coord(1, 0): Direction.RIGHT,
+        }
+
+DIRECTION_COORD = {
+        Direction.UP: Coord(0, -1),
+        Direction.DOWN: Coord(0, 1),
+        Direction.LEFT: Coord(-1, 0),
+        Direction.RIGHT: Coord(1, 0),
+        }
 
 @dataclass
 class ListNode:
@@ -102,6 +119,13 @@ class ListNode:
         val = n.val
         prev.next = None
         return val
+
+    def reverse(self) -> 'ListNode':
+        n = self
+        prev = None
+        while n:
+            n.next, n, prev = prev, n.next, n
+        return prev
 
     @staticmethod
     def from_iter(iterator):
@@ -167,15 +191,7 @@ class SnakeGame:
                 pos in self.snake)
 
     def update(self):
-        pos = self.snake.val.clone()
-        if self.direction == Direction.UP:
-            pos.y -= 1
-        elif self.direction == Direction.DOWN:
-            pos.y += 1
-        elif self.direction == Direction.LEFT:
-            pos.x -= 1
-        elif self.direction == Direction.RIGHT:
-            pos.x += 1
+        pos = self.snake.val.clone() + DIRECTION_COORD[self.direction]
         if self.collide(pos):
             self.running = False
             return
@@ -197,7 +213,9 @@ class SnakeGame:
             if self.direction is not OPPOSITE_DIRECTIONS[d]:
                 self.direction = d
         elif ch == 'r':
+            # TODO: DON'T JUST REVERSE DIRECTION BUT FIND THE CORRECT DIRECTION
             self.direction = OPPOSITE_DIRECTIONS[self.direction]
+            self.snake = self.snake.reverse()
 
     def run(self):
         self.setup_window()
