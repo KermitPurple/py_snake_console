@@ -39,10 +39,13 @@ class Coord:
         return self * other
 
     def __div__(self, other):
+        return self.__floordiv__(self, other)
+
+    def __floordiv__(self, other):
         if type(other) is int:
-            return Coord(self.x / other, self.y / other)
+            return Coord(self.x // other, self.y // other)
         elif type(other) is Coord:
-            return Coord(self.x / other.x, self.y / other.y)
+            return Coord(self.x // other.x, self.y // other.y)
         else:
             raise TypeError(f'Cannot divide {type(other)} and Coord')
 
@@ -96,7 +99,8 @@ class ListNode:
 class SnakeGame:
     """A console-based snake application"""
     def __init__(self):
-        self.snake = ListNode(Coord(5, 5))
+        self.board_size = Coord(50, 50)
+        self.snake = ListNode(self.board_size // 2)
 
     def run(self):
         pass
@@ -106,4 +110,3 @@ move_cursor = lambda pos: print(Cursor.POS(*pos),end='')
 if __name__ == '__main__': # driver code
     init()
     SnakeGame().run()
-    print(ListNode.from_iter(range(10)))
