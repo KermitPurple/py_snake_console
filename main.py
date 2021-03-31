@@ -1,7 +1,14 @@
-import cursor
+import cursor, random
+from enum import Enum
 from os import system
 from colorama import init, Fore, Back, Style, Cursor
 from dataclasses import dataclass
+
+class Direction(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 @dataclass
 class Coord:
@@ -107,6 +114,7 @@ class SnakeGame:
         self.board_size = Coord(80, 40)
         self.window_size = self.board_to_screen(self.board_size) + Coord(2, 1)
         self.snake = ListNode(self.board_size // 2)
+        self.length_to_add = 2
 
     def setup_window(self):
         system(f'mode con: cols={self.window_size.x} lines={self.window_size.y}')
