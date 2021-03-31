@@ -159,6 +159,19 @@ class SnakeGame:
         self.length_to_add = 2
         self.direction = Direction.UP
         self.running = True
+        self.fruit = self.get_new_fruit()
+
+    def empty_spots(self):
+        result = []
+        for i in range(self.board_size.y):
+            for j in range(self.board_size.x):
+                c = Coord(j, i)
+                if c not in self.snake:
+                    result.append(c)
+        return result
+
+    def get_new_fruit(self):
+        return random.choice(self.empty_spots())
 
     def board_to_screen(self, pos):
         pos = Coord(*pos)
@@ -179,6 +192,10 @@ class SnakeGame:
         self.move_cursor(self.board_to_screen(pos))
         print(Back.BLUE + Fore.LIGHTBLUE_EX + 'XX' + Style.RESET_ALL)
 
+    def draw_fruit_piece(self, pos: Coord):
+        self.move_cursor(self.board_to_screen(pos))
+        print(Back.RED + '  ' + Style.RESET_ALL)
+
     def erase_piece(self, pos: Coord):
         self.move_cursor(self.board_to_screen(pos))
         print('  ')
@@ -195,12 +212,16 @@ class SnakeGame:
         if self.collide(pos):
             self.running = False
             return
+        elif pos == self.fruit:
+            self.fruit = self.get_new_fruit()
+            self.length_to_add += 2
         self.erase_piece(self.snake.tail().val)
         self.snake = self.snake.push_front(pos)
         if self.length_to_add == 0:
             self.snake.pop()
         else:
             self.length_to_add -= 1
+        self.draw_fruit_piece(self.fruit)
         self.draw_head_piece(self.snake.val)
         self.draw_tail_piece(self.snake.next.val)
 
