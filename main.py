@@ -113,14 +113,17 @@ class ListNode:
 class SnakeGame:
     """A console-based snake application"""
     move_cursor = lambda self, pos: print(Cursor.POS(*pos),end='')
-    board_to_screen = lambda self, pos: pos * Coord(2, 1) + Coord(2, 1)
 
     def __init__(self):
         self.board_size = Coord(80, 40)
-        self.window_size = self.board_to_screen(self.board_size) + Coord(2, 1)
+        self.window_size = self.board_to_screen(self.board_size) + Coord(1, 0)
         self.snake = ListNode(self.board_size // 2)
         self.length_to_add = 2
         self.direction = Direction.UP
+
+    def board_to_screen(self, pos):
+        pos = Coord(*pos)
+        return pos * Coord(2, 1) + Coord(3, 2)
 
     def setup_window(self):
         system(f'mode con: cols={self.window_size.x} lines={self.window_size.y}')
@@ -128,6 +131,14 @@ class SnakeGame:
         for _ in range(self.window_size.y - 2):
             print(Back.WHITE + '  '  + Back.BLACK + ' ' * (self.window_size.x - 4) + Back.WHITE + '  ', end = '')
         print(Back.WHITE + ' ' * self.window_size.x + Style.RESET_ALL, end = '')
+
+    def draw_tail_piece(self, pos):
+        self.move_cursor(self.board_to_screen(pos))
+        print(Back.BLUE + Fore.LIGHTBLUE_EX + '▒▒')
+
+    def draw_head_piece(self, pos):
+        self.move_cursor(self.board_to_screen(pos))
+        print(Back.BLUE + Fore.LIGHTBLUE_EX + 'XX')
 
     def update(self):
         pos = self.snake.val
@@ -145,11 +156,12 @@ class SnakeGame:
         else:
             self.length_to_add -= 1
 
-
     def run(self):
         self.setup_window()
         while 1:
             self.update()
+            self.draw_head_piece((0, 0))
+            self.draw_head_piece(self.board_size - 1)
 
 
 if __name__ == '__main__': # driver code
