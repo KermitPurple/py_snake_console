@@ -1,14 +1,22 @@
 import cursor, random, time
 from enum import Enum
 from os import system
-from colorama import init, Fore, Back, Style, Cursor
+from msvcrt import kbhit, getch
+from colorama import init, Fore, Back, Style, Cursor, deinit
 from dataclasses import dataclass
 
 class Direction(Enum):
-    UP = 0
-    DOWN = 1
-    LEFT = 2
-    RIGHT = 3
+    UP = 'w'
+    DOWN = 's'
+    LEFT = 'a'
+    RIGHT = 'd'
+
+OPPOSITE_DIRECTIONS = {
+        Direction.UP: Direction.DOWN,
+        Direction.DOWN: Direction.UP,
+        Direction.LEFT: Direction.RIGHT,
+        Direction.RIGHT: Direction.LEFT,
+        }
 
 @dataclass
 class Coord:
@@ -163,6 +171,17 @@ class SnakeGame:
         else:
             self.length_to_add -= 1
 
+    def keyboard_input(self):
+        if not kbhit():
+            return
+        ch = getch().decode('utf-8').lower()
+        if ch in 'wasd':
+            d = Direction(ch)
+            if self.direction is not OPPOSITE_DIRECTIONS[d]:
+                self.direction = d
+        elif ch == 'r':
+            self.direction = OPPOSITE_DIRECTIONS[self.direction]
+
     def run(self):
         self.setup_window()
         while 1:
@@ -170,7 +189,8 @@ class SnakeGame:
             self.update()
             self.draw_head_piece(self.snake.val)
             self.draw_tail_piece(self.snake.next.val)
-            time.sleep(0.2)
+            self.keyboard_input()
+            time.sleep(0.1)
 
 if __name__ == '__main__': # driver code
     init()
@@ -179,3 +199,4 @@ if __name__ == '__main__': # driver code
         SnakeGame().run()
     finally:
         cursor.show()
+        deinit()
