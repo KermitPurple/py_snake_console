@@ -154,12 +154,13 @@ class SnakeGame:
 
     def __init__(self):
         self.board_size = Coord(80, 40)
-        self.window_size = self.board_to_screen(self.board_size) + Coord(1, 0)
+        self.window_size = self.board_to_screen(self.board_size) + Coord(1, 1)
         self.snake = ListNode(self.board_size // 2)
         self.length_to_add = 2
         self.direction = Direction.UP
         self.running = True
         self.fruit = self.get_new_fruit()
+        self.score = 0
 
     def empty_spots(self):
         result = []
@@ -180,7 +181,7 @@ class SnakeGame:
     def setup_window(self):
         system(f'mode con: cols={self.window_size.x} lines={self.window_size.y}')
         print(Back.WHITE + ' ' * self.window_size.x, end = '')
-        for _ in range(self.window_size.y - 2):
+        for _ in range(self.window_size.y - 3):
             print(Back.WHITE + '  '  + Back.BLACK + ' ' * (self.window_size.x - 4) + Back.WHITE + '  ', end = '')
         print(Back.WHITE + ' ' * self.window_size.x + Style.RESET_ALL, end = '')
 
@@ -207,6 +208,10 @@ class SnakeGame:
                 pos.y >= self.board_size.y or
                 pos in self.snake)
 
+    def update_score(self):
+        self.move_cursor((1, self.window_size.y))
+        print(f'Score: {self.score}', end = '')
+
     def update(self):
         pos = self.snake.val.clone() + DIRECTION_COORD[self.direction]
         if self.collide(pos):
@@ -214,6 +219,8 @@ class SnakeGame:
             return
         elif pos == self.fruit:
             self.fruit = self.get_new_fruit()
+            self.score += 1
+            self.update_score()
             self.length_to_add += 2
         self.erase_piece(self.snake.tail().val)
         self.snake = self.snake.push_front(pos)
@@ -240,6 +247,7 @@ class SnakeGame:
 
     def run(self):
         self.setup_window()
+        self.update_score()
         while self.running:
             self.update()
             self.keyboard_input()
