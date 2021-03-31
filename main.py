@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+import cursor
+from os import system
 from colorama import init, Fore, Back, Style, Cursor
+from dataclasses import dataclass
 
 @dataclass
 class Coord:
@@ -98,15 +100,31 @@ class ListNode:
 
 class SnakeGame:
     """A console-based snake application"""
+    move_cursor = lambda self, pos: print(Cursor.POS(*pos),end='')
+    board_to_screen = lambda self, pos: pos * Coord(2, 1) + Coord(2, 1)
+
     def __init__(self):
-        self.board_size = Coord(50, 50)
+        self.board_size = Coord(80, 40)
+        self.window_size = self.board_to_screen(self.board_size) + Coord(2, 1)
         self.snake = ListNode(self.board_size // 2)
 
-    def run(self):
-        pass
+    def setup_window(self):
+        system(f'mode con: cols={self.window_size.x} lines={self.window_size.y}')
+        print(Back.WHITE + ' ' * self.window_size.x, end = '')
+        for _ in range(self.window_size.y - 2):
+            print(Back.WHITE + '  '  + Back.BLACK + ' ' * (self.window_size.x - 4) + Back.WHITE + '  ', end = '')
+        print(Back.WHITE + ' ' * self.window_size.x + Style.RESET_ALL, end = '')
 
-move_cursor = lambda pos: print(Cursor.POS(*pos),end='')
+    def run(self):
+        self.setup_window()
+        while 1:
+            pass
+
 
 if __name__ == '__main__': # driver code
     init()
-    SnakeGame().run()
+    cursor.hide()
+    try:
+        SnakeGame().run()
+    finally:
+        cursor.show()
