@@ -147,6 +147,17 @@ class ListNode:
             n = n.next
         return s
 
+class FruitType(Enum):
+    GROW = Back.RED + '  ' + Style.RESET_ALL
+    REVERSE = Back.GREEN + '  ' + Style.RESET_ALL
+
+class Fruit(Coord):
+    """A class to represent a fruit in the snake game"""
+    def __init__(self, x: int, y: int):
+        super().__init__(x, y)
+        self.type = FruitType.GROW
+        if random.random() < 0.2: # 20 percent chance
+            self.type = FruitType.REVERSE
 
 class SnakeGame:
     """A console-based snake application"""
@@ -161,6 +172,7 @@ class SnakeGame:
         self.running = True
         self.fruit = self.get_new_fruit()
         self.score = 0
+        self.should_reverse = False
 
     def empty_spots(self):
         result = []
@@ -171,8 +183,8 @@ class SnakeGame:
                     result.append(c)
         return result
 
-    def get_new_fruit(self):
-        return random.choice(self.empty_spots())
+    def get_new_fruit(self) -> Fruit:
+        return Fruit(*random.choice(self.empty_spots()))
 
     def board_to_screen(self, pos):
         pos = Coord(*pos)
@@ -195,7 +207,7 @@ class SnakeGame:
 
     def draw_fruit_piece(self, pos: Coord):
         self.move_cursor(self.board_to_screen(pos))
-        print(Back.RED + '  ' + Style.RESET_ALL)
+        print(self.fruit.type.value)
 
     def erase_piece(self, pos: Coord):
         self.move_cursor(self.board_to_screen(pos))
@@ -217,12 +229,15 @@ class SnakeGame:
         if self.collide(pos):
             self.running = False
             return
-        elif pos == self.fruit:
+        self.erase_piece(self.snake.tail().val)
+        if pos == self.fruit:
+            if self.fruit.type == FruitType.GROW:
+                self.length_to_add += 2
+            elif self.fruit.type == FruitType.REVERSE:
+                self.should_reverse = True
             self.fruit = self.get_new_fruit()
             self.score += 1
             self.update_score()
-            self.length_to_add += 2
-        self.erase_piece(self.snake.tail().val)
         self.snake = self.snake.push_front(pos)
         if self.length_to_add == 0:
             self.snake.pop()
@@ -231,6 +246,13 @@ class SnakeGame:
         self.draw_fruit_piece(self.fruit)
         self.draw_head_piece(self.snake.val)
         self.draw_tail_piece(self.snake.next.val)
+        if self.should_reverse:
+            self.should_reverse = False
+            self.reverse_snake()
+
+    def reverse_snake(self):
+            self.snake = self.snake.reverse()
+            self.direction = COORD_DIRECTION[self.snake.val - self.snake.next.val]
 
     def keyboard_input(self):
         if not kbhit():
@@ -240,10 +262,6 @@ class SnakeGame:
             d = Direction(ch)
             if self.direction is not OPPOSITE_DIRECTIONS[d]:
                 self.direction = d
-        elif ch == 'r':
-            # TODO: DON'T JUST REVERSE DIRECTION BUT FIND THE CORRECT DIRECTION
-            self.direction = OPPOSITE_DIRECTIONS[self.direction]
-            self.snake = self.snake.reverse()
 
     def run(self):
         self.setup_window()
